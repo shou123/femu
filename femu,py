@@ -44,6 +44,7 @@ def data_process(lists):
     # with open(path) as myfile:
     #     head = [next(myfile) for x in range(count)]
 
+
         for item in lists:
             request_type = item.split(" ")[1].split(".")[1]
             object_id = item.split(" ")[2]
@@ -54,13 +55,16 @@ def data_process(lists):
                     file_size = int(os.path.getsize(os.path.join('/home/fvm/info/datafile',object_id)))
                     data = os.path.join('/home/fvm/info/datafile',object_id)
                     client = minio_server()
+                    put_start_time = datetime.now()
                     client.fput_object("bucket01",object_id,data)
-                    print("data_process() ---> object_id: {}".format(object_id))
+                    put_end_time = datetime.now()
+                    put_execution_time = put_end_time-put_start_time
+                    print("put/head data_process() ---> object_id: {}, execution time: {}".format(object_id))
                 elif request_type == "GET":
                     file_size = int(os.path.getsize(os.path.join('/home/fvm/info/datafile',object_id)))
                     client = minio_server()
                     client.fget_object("bucket01",object_id,os.path.join("/home/fvm/info/downloadfile",object_id))
-                    print("data_process() ---> object_id: {}".format(object_id))
+                    print("get data_process() ---> object_id: {}".format(object_id))
 
 def data_slice():
     path = "/home/fvm/info/tracefile/IBMObjectStoreTrace026Part0"
