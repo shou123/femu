@@ -1,0 +1,129 @@
+import os
+import sys
+from time import sleep
+from minio import Minio
+from datetime import datetime
+
+def file_generator(lists):
+    # path = "/home/fvm/info/tracefile/IBMObjectStoreTrace026Part0"
+    # with open(path) as myfile:
+    #     head = [next(myfile) for x in range(count)]
+
+        for item in lists:
+            request_type = item.split(" ")[1].split(".")[1]
+            object_id = item.split(" ")[2]
+            if request_type != "DELETE":
+                size = int(item.split(" ")[3])
+
+            
+                file = open(os.path.join("/home/fvm/info/datafile",object_id),"wb")
+                file.seek(size)
+                file.write(b"\0")
+                file.close()
+
+def data_prepare(lists):
+    # path = "/home/fvm/info/tracefile/IBMObjectStoreTrace026Part0"
+    # with open(path) as myfile:
+    #     head = [next(myfile) for x in range(count)]
+
+        for item in lists:
+            request_type = item.split(" ")[1].split(".")[1]
+            object_id = item.split(" ")[2]
+            if request_type !="DELETE":
+                size = int(item.split(" ")[3])
+
+                if request_type == "GET":
+                    data = os.path.join('/home/fvm/info/datafile',object_id)
+                    client = minio_server()
+                    client.fput_object("bucket01",object_id,data)
+                    print("data_prepare() ---> object_id: {}".format(object_id))
+
+
+def data_process(lists):
+    # path = "/home/fvm/info/tracefile/IBMObjectStoreTrace026Part0"
+    # with open(path) as myfile:
+    #     head = [next(myfile) for x in range(count)]
+
+        for item in lists:
+            request_type = item.split(" ")[1].split(".")[1]
+            object_id = item.split(" ")[2]
+            if request_type !="DELETE":
+                size = int(item.split(" ")[3])
+
+                if request_type == "PUT" or request_type == "HEAD":
+                    file_size = int(os.path.getsize(os.path.join('/home/fvm/info/datafile',object_id)))
+                    data = os.path.join('/home/fvm/info/datafile',object_id)
+                    client = minio_server()
+                    client.fput_object("bucket01",object_id,data)
+                    print("data_process() ---> object_id: {}".format(object_id))
+                elif request_type == "GET":
+                    file_size = int(os.path.getsize(os.path.join('/home/fvm/info/datafile',object_id)))
+                    client = minio_server()
+                    client.fget_object("bucket01",object_id,os.path.join("/home/fvm/info/downloadfile",object_id))
+                    print("data_process() ---> object_id: {}".format(object_id))
+
+def data_slice():
+    path = "/home/fvm/info/tracefile/IBMObjectStoreTrace026Part0"
+    with open(path) as myfile:
+        head = [next(myfile) for x in range(100)]
+        size = 10
+        for i in range(0, len(head), size):
+            lists = head[i:i+size]
+
+def minio_server():
+    # Create a client with the MinIO server playground, its access key
+    # and secret key.
+    client = Minio(
+        "10.0.2.15:9000",
+        secure=False,
+        access_key="minioadmin",
+        secret_key="minioadmin",
+    )
+    # Make 'asiatrip' bucket if not exist.
+    found = client.bucket_exists("bucket01")
+    if not found:
+        client.make_bucket("bucket01")
+
+    return client
+
+def clear():
+        data_file_dir = '/home/fvm/info/datafile'
+        for f in os.listdir(data_file_dir):
+            os.remove(os.path.join(data_file_dir, f))
+
+        download_file_dir = '/home/fvm/info/downloadfile'
+        for f in os.listdir(download_file_dir):
+            os.remove(os.path.join(download_file_dir, f))
+        client = minio_server()
+        objects = client.list_objects("bucket01")
+
+        print("Delete minio data start time: {}".format(datetime.now()))
+        for obj in objects:
+            client.remove_object("bucket01", obj.object_name)
+        print("Delete minio data end time: {}".format(datetime.now()))
+
+        
+
+def main():
+    range_size = 10000
+    slice_size = 10
+    path = "/home/fvm/info/tracefile/IBMObjectStoreTrace026Part0"
+    with open(path) as myfile:
+        head = [next(myfile) for x in range(range_size)]
+        for i in range(0, len(head), slice_size):
+            lists = head[i:i+slice_size]
+            file_generator(lists)
+            data_prepare(lists)
+            data_process(lists)
+
+            sleep(3)
+            clear()
+
+    
+
+
+
+
+
+if __name__ == "__main__":
+    main()
