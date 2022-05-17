@@ -11,22 +11,6 @@ def printlog(message):
         logFile.write("\n")
         logFile.close()
 
-
-# def compressFile():
-#     for filename in os.listdir("/home/shiyue/Downloads"):
-
-
-#         file_name = "/root/backup/home.tar.gz"
-
-#         tar = tarfile.open(file_name, "w:gz")
-#         os.chdir("/home")
-#         for name in os.listdir("."):
-#             tar.add(name)
-#         tar.close()
-
-
-
-
 def main():
     for tracename in os.listdir("/home/shiyue/Downloads/traces"):
 
@@ -67,6 +51,7 @@ def main():
         print("Trace: {} Length: {} Total trace size : {} GB".format(tracename,objectCount,float(totalSize/1024/1024/1024)))
         print("Trace: {} GET number: {} GET size: {} GB".format(tracename,getcount,float(gettotalSize/1024/1024/1024)))
         print("Trace: {} PUT number: {} PUT size: {} GB".format(tracename,putcount+headcount,float((puttotalSize+ headtotalSize)/1024/1024/1024)))
+        print("Trace Mean Value: {} MB".format(float(totalSize/objectCount/1024/2014)))
         print("")
 
         printlog("Trace: {} Length: {} Total trace size : {} GB".format(tracename,objectCount,float(totalSize/1024/1024/1024)))
