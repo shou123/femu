@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import sys
 import tarfile
+import statistics
 
 
 def printlog(message):
@@ -29,6 +30,7 @@ def main():
         headtotalSize = 0.0
 
         totalSize = 0.0
+        sizelist = []
         for line in lines:
 
             info = line.split()
@@ -47,11 +49,12 @@ def main():
                 headcount+=1
                 headtotalSize+=fileSize
             totalSize +=fileSize
-    
+            sizelist.append(fileSize)
         print("Trace: {} Length: {} Total trace size : {} GB".format(tracename,objectCount,float(totalSize/1024/1024/1024)))
         print("Trace: {} GET number: {} GET size: {} GB".format(tracename,getcount,float(gettotalSize/1024/1024/1024)))
         print("Trace: {} PUT number: {} PUT size: {} GB".format(tracename,putcount+headcount,float((puttotalSize+ headtotalSize)/1024/1024/1024)))
         print("Trace Mean Value: {} MB".format(float(totalSize/objectCount/1024/2014)))
+        print("Trace Standard Deviation: {} MB".format(float(statistics.stdev(sizelist)/1024/2014)))
         print("")
 
         printlog("Trace: {} Length: {} Total trace size : {} GB".format(tracename,objectCount,float(totalSize/1024/1024/1024)))
