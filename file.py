@@ -1,9 +1,12 @@
 from datetime import datetime
-
 import os
 import sys
 import tarfile
 import statistics
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 
 def printlog(message):
@@ -13,6 +16,7 @@ def printlog(message):
         logFile.close()
 
 def main():
+    print("print_version: {}".format(sys.version))
     for tracename in os.listdir("/home/shiyue/Downloads/traces"):
 
         path = os.path.join("/home/shiyue/Downloads/traces",tracename)
@@ -50,6 +54,21 @@ def main():
                 headtotalSize+=fileSize
             totalSize +=fileSize
             sizelist.append(fileSize)
+        
+        #CDF
+        data = np.sort(sizelist)
+        p = 1. * np.arange(len(data)) / float(len(data) - 1)
+        print("The CDF result is-",p)
+        fig = plt.figure()
+        fig.suptitle(tracename)
+        ax2 = fig.add_subplot(111)
+        ax2.plot(data/1024/1024, p)
+        ax2.set_xlabel('Trace Size (MB)')
+        ax2.set_ylabel('p')
+        # plt.show()
+        plt.savefig(tracename)
+
+        print("")
         print("Trace: {} Length: {} Total trace size : {} GB".format(tracename,objectCount,float(totalSize/1024/1024/1024)))
         print("Trace: {} GET number: {} GET size: {} GB".format(tracename,getcount,float(gettotalSize/1024/1024/1024)))
         print("Trace: {} PUT number: {} PUT size: {} GB".format(tracename,putcount+headcount,float((puttotalSize+ headtotalSize)/1024/1024/1024)))
