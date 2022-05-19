@@ -16,9 +16,9 @@ def printlog(message):
         logFile.close()
 
 def main():
-    print("print_version: {}".format(sys.version))
     for tracename in os.listdir("/home/shiyue/Downloads/traces"):
 
+        traceShortName = tracename[20:22]
         path = os.path.join("/home/shiyue/Downloads/traces",tracename)
         objectCount = 10000
 
@@ -53,27 +53,29 @@ def main():
                 headcount+=1
                 headtotalSize+=fileSize
             totalSize +=fileSize
-            sizelist.append(fileSize)
+
+            newFileSize = fileSize/1024/1024 #convert file_size from B to MB
+            sizelist.append(newFileSize)
         
         #CDF
         data = np.sort(sizelist)
         p = 1. * np.arange(len(data)) / float(len(data) - 1)
-        print("The CDF result is-",p)
+        # print("The CDF result is-",p)
         fig = plt.figure()
-        fig.suptitle(tracename)
+        fig.suptitle(traceShortName)
         ax2 = fig.add_subplot(111)
-        ax2.plot(data/1024/1024, p)
+        ax2.plot(data, p)
         ax2.set_xlabel('Trace Size (MB)')
         ax2.set_ylabel('p')
         # plt.show()
         plt.savefig(tracename)
 
         print("")
-        print("Trace: {} Length: {} Total trace size : {} GB".format(tracename,objectCount,float(totalSize/1024/1024/1024)))
-        print("Trace: {} GET number: {} GET size: {} GB".format(tracename,getcount,float(gettotalSize/1024/1024/1024)))
-        print("Trace: {} PUT number: {} PUT size: {} GB".format(tracename,putcount+headcount,float((puttotalSize+ headtotalSize)/1024/1024/1024)))
+        print("Trace: {} Length: {} Total trace size : {} GB".format(traceShortName,objectCount,float(totalSize/1024/1024/1024)))
+        print("Trace: {} GET number: {} GET size: {} GB".format(traceShortName,getcount,float(gettotalSize/1024/1024/1024)))
+        print("Trace: {} PUT number: {} PUT size: {} GB".format(traceShortName,putcount+headcount,float((puttotalSize+ headtotalSize)/1024/1024/1024)))
         print("Trace Mean Value: {} MB".format(float(totalSize/objectCount/1024/2014)))
-        print("Trace Standard Deviation: {} MB".format(float(statistics.stdev(sizelist)/1024/2014)))
+        print("Trace Standard Deviation: {} MB".format(float(statistics.stdev(sizelist))))
         print("")
 
         printlog("Trace: {} Length: {} Total trace size : {} GB".format(tracename,objectCount,float(totalSize/1024/1024/1024)))
